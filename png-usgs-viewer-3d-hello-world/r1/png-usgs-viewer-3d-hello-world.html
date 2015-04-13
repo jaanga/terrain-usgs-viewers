@@ -21,12 +21,22 @@
 
 	var lat = 37;
 	var lon = -123;
+	var scale = 10;
 
 	var imageDir = 'c:/temp/usgs/04-test/';
 	var imageDir = 'http://jaanga.github.io/terrain-usgs-data-1second/images/';
 
 	var files = [
-// 'n28w101','n28w104','n29w101','n29w102','n29w103','n29w104','n29w105','n30w101','n30w102','n30w103','n30w104','n30w105','n30w106','n31w101','n31w102','n31w103','n31w104','n31w105','n31w106','n31w107','n31w108','n31w109','n31w110','n31w111','n31w112','n31w113','n31w114','n32w101','n32w102','n32w103','n32w104','n32w105','n32w106','n32w107','n32w108','n32w109','n32w110','n32w111','n32w112','n32w113','n32w114','n32w115','n32w116','n32w117','n32w118','n32w119','n33w101','n33w102','n33w103','n33w104','n33w105','n33w106','n33w107','n33w108','n33w109','n33w110','n33w111','n33w112','n33w113','n33w114','n33w115','n33w116','n33w117','n33w118','n33w119','n33w120','n33w121','n34w101','n34w102','n34w103','n34w104','n34w105','n34w106','n34w107','n34w108','n34w109','n34w110','n34w111','n34w112','n34w113','n34w114','n34w115','n34w116','n34w117','n34w118','n34w119','n34w120','n34w121','n35w101','n35w102','n35w103','n35w104','n35w105','n35w106','n35w107','n35w108','n35w109','n35w110','n35w111','n35w112','n35w113','n35w114','n35w115','n35w116','n35w117','n35w118','n35w119','n35w120','n35w121','n35w122','n36w101','n36w102','n36w103','n36w104','n36w105','n36w106','n36w107','n36w108','n36w109','n36w110','n36w111','n36w112','n36w113','n36w114','n36w115','n36w116','n36w117','n36w118','n36w119','n36w120','n36w121','n36w122','n36w123','n37w101','n37w102','n37w103','n37w104','n37w105','n37w106','n37w107','n37w108','n37w109','n37w110','n37w111','n37w112','n37w113','n37w114','n37w115','n37w116','n37w117','n37w118','n37w119','n37w120',
+// 'n28w101','n28w104','n29w101','n29w102','n29w103','n29w104','n29w105','n30w101','n30w102','n30w103','n30w104','n30w105','n30w106','n31w101','n31w102','n31w103','n31w104','n31w105','n31w106','n31w107','n31w108','n31w109','n31w110','n31w111','n31w112','n31w113','n31w114','n32w101','n32w102','n32w103','n32w104','n32w105','n32w106','n32w107','n32w108','n32w109','n32w110','n32w111','n32w112','n32w113','n32w114','n32w115','n32w116','n32w117','n32w118','n32w119','n33w101','n33w102','n33w103','n33w104','n33w105','n33w106','n33w107','n33w108','n33w109','n33w110','n33w111','n33w112','n33w113','n33w114','n33w115','n33w116','n33w117','n33w118','n33w119','n33w120','n33w121','n34w101','n34w102','n34w103','n34w104','n34w105','n34w106','n34w107','n34w108','n34w109','n34w110','n34w111','n34w112','n34w113','n34w114','n34w115','n34w116','n34w117','n34w118','n34w119','n34w120','n34w121','n35w101','n35w102','n35w103','n35w104','n35w105','n35w106','n35w107','n35w108','n35w109','n35w110','n35w111','n35w112','n35w113','n35w114','n35w115','n35w116',
+
+		'n35w117','n35w118','n35w119','n35w120','n35w121','n35w122',
+
+
+//'n36w101','n36w102','n36w103','n36w104','n36w105','n36w106','n36w107','n36w108','n36w109','n36w110','n36w111','n36w112','n36w113','n36w114','n36w115','n36w116','n36w117','n36w118','n36w119',
+
+		'n36w120','n36w121','n36w122','n36w123',
+
+//'n37w101','n37w102','n37w103','n37w104','n37w105','n37w106','n37w107','n37w108','n37w109','n37w110','n37w111','n37w112','n37w113','n37w114','n37w115','n37w116','n37w117','n37w118','n37w119','n37w120',
 
 		'n37w121','n37w122','n37w123'
 
@@ -59,6 +69,7 @@
 			'<p>East / West <input type=range id=inpLeft min=0 max=3345 value=2000 step=1 onmousemove=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
 			'<p>North / South <input type=range id=inpTop min=0 max=3345 value=600 step=1 onmousemove=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
 			'<p>View Size <input type=range id=inpSize min=100 max=3601 value=256 step=1 onmousemove=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
+			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=10 step=1 onmousemove=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
 
 
 			'<p>' +
@@ -163,7 +174,7 @@
 
 		var vertices = geometry.attributes.position.array;
 		var elevation;
-		var scl = 0.08;
+		var scl = 0.01 * scale;
 
 		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
 
@@ -178,8 +189,6 @@
 
 		geometry.computeFaceNormals();
 		geometry.computeVertexNormals();
-
-
 
 		scene.remove( terrain )
 		terrain = new THREE.Mesh( geometry, mapMaterial );
