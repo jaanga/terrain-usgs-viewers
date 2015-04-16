@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang=en >
+<head>
+<title>PNG USGS 1 Second Viewer 3D Hello World</title>
+<meta charset=utf-8 />
+<meta name=viewport content='width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0' />
+</head>
+<body>
+<script src=http://mrdoob.github.io/three.js/build/three.min.js ></script>
+<script src=http://mrdoob.github.io/three.js/examples/js/controls/OrbitControls.js ></script>
+<script src=http://mrdoob.github.io/three.js/examples/js/libs/stats.min.js ></script>
+<script>
+
+
+//	var fileName = 'http://i.imgur.com/I6s39Gt.png';
+//	var fileName = 'http://i.imgur.com/WHtXG7R.png';
+	var fileName = 'http://i.imgur.com/pkW8c5Q.png';
+	var fileName = 'http://i.imgur.com/ujk1uKo.png';
+	var fileName = 'http://i.imgur.com/t2Rn6JL.png';
+	var fileName = 'http://i.imgur.com/tekJR4i.png';
+
+	var lat = 37;
+	var lon = -123;
+	var scale = 10;
+
+	var imageDir = 'c:/temp/usgs/04-test/';
+	var imageDir = 'http://jaanga.github.io/terrain-usgs-data-1second/images/';
+
+	var files = [
+// 'n28w101','n28w104','n29w101','n29w102','n29w103','n29w104','n29w105','n30w101','n30w102','n30w103','n30w104','n30w105','n30w106','n31w101','n31w102','n31w103','n31w104','n31w105','n31w106','n31w107','n31w108','n31w109','n31w110','n31w111','n31w112','n31w113','n31w114','n32w101','n32w102','n32w103','n32w104','n32w105','n32w106','n32w107','n32w108','n32w109','n32w110','n32w111','n32w112','n32w113','n32w114',
+
+		'n32w115','n32w116','n32w117','n32w118','n32w119',
+
+//'n33w101','n33w102','n33w103','n33w104','n33w105','n33w106','n33w107','n33w108','n33w109','n33w110','n33w111','n33w112','n33w113','n33w114',
+
+		'n33w115','n33w116','n33w117','n33w118','n33w119','n33w120','n33w121',
+
+//'n34w101','n34w102','n34w103','n34w104','n34w105','n34w106','n34w107','n34w108','n34w109','n34w110','n34w111','n34w112','n34w113','n34w114',
+
+		'n34w115','n34w116','n34w117','n34w118','n34w119','n34w120','n34w121',
+
+//'n35w101','n35w102','n35w103','n35w104','n35w105','n35w106','n35w107','n35w108','n35w109','n35w110','n35w111','n35w112','n35w113','n35w114',
+
+		'n35w115','n35w116','n35w117','n35w118','n35w119','n35w120','n35w121','n35w122',
+
+//'n36w101','n36w102','n36w103','n36w104','n36w105','n36w106','n36w107','n36w108','n36w109','n36w110','n36w111','n36w112','n36w113','n36w114',
+
+		'n36w115','n36w116','n36w117','n36w118','n36w119','n36w120','n36w121','n36w122','n36w123',
+
+//'n37w101','n37w102','n37w103','n37w104','n37w105','n37w106','n37w107','n37w108','n37w109','n37w110','n37w111','n37w112','n37w113','n37w114',
+
+		'n37w115','n37w116','n37w117', 'n37w118','n37w119','n37w120','n37w121','n37w122','n37w123'
+
+	];
+
+	var stats, renderer, scene, camera, controls;
+	var geometry, material, mesh, axisHelper;
+
+	var heightMap, canvasHeightMap, contextHeightMap;
+	var canvasTerrain, contextTerrain;
+	var terrain, mapMaterial;
+
+	var viewSize = 256;
+	var viewHeight = 256;
+	var viewLeft = 2000;
+	var viewTop = 600;
+
+	init();
+	animate();
+
+	function init() {
+
+		var css = document.head.appendChild( document.createElement('style') );
+		css.innerHTML ='body { font: 600 12pt monospace; margin: 0; overflow: hidden; }' ;
+
+		var info = document.body.appendChild( document.createElement( 'div' ) );
+		info.style.cssText = 'margin: 20px; max-width: 300px; position: absolute;';
+		info.innerHTML = '<a href="" ><h1>' + document.title + '</h1></a>' +
+			'<p>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</p>' +
+			'<div id=msg1 ></div>' +
+			'<p id=heightMapHolder ></p>' +
+			'<p>East / West <input type=range id=inpLeft min=0 max=3601 value=2000 step=1 onmousemove=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
+			'<p>North / South <input type=range id=inpTop min=0 max=3601 value=600 step=1 onmousemove=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
+			'<p>View Size <input type=range id=inpSize min=100 max=3601 value=256 step=1 onmousemove=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
+			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=10 step=1 onmousemove=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
+
+			'<p>' +
+				'Go: <button onclick=tileWest(); title="Go west" >&#8678;</button> ' +
+				'<button onclick=tileEast(); title="Go east"  >&#8680;</button> ' +
+
+				'<button onclick=tileNorth(); title="Go north" >&#8679;</button> ' +
+				'<button onclick=tileSouth(); title="Go south" >&#8681;</button> ' +
+			'</p>' +
+		'';
+
+		stats = new Stats();
+		stats.domElement.style.cssText = 'position: absolute; right: 0; top: 0; z-index: 100; ';
+		document.body.appendChild( stats.domElement );
+
+		renderer = new THREE.WebGLRenderer( { alpha: 1, antialias: true, clearColor: 0xffffff }  );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );
+
+		camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
+		camera.position.set( 200, 200, 200 );
+
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+		scene = new THREE.Scene();
+
+// axes
+		var axisHelper = new THREE.AxisHelper( 50 );
+		scene.add( axisHelper );
+
+		mapMaterial = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading, side: 2 } );
+
+//
+		heightMap = document.createElement( 'img' );
+//		document.body.appendChild( heightMap );
+//		heightMap.style.cssText = 'margin: 20px; position: absolute; top: 0; z-index: -10; ';
+
+		heightMap.crossOrigin = 'anonymous';
+		heightMap.onload = updateTerrain;
+//		heightMap.src = fileName;
+
+		canvasHeightMap = heightMapHolder.appendChild( document.createElement( 'canvas' ) );
+		canvasHeightMap.width = 256; canvasHeightMap.height = 256;
+		canvasHeightMap.style.cssText = 'border: 1px red solid; /* position: absolute; top: 0; left: 6px;  z-index: 10; */ ';
+		contextHeightMap = canvasHeightMap.getContext( '2d' );
+
+		canvasTerrain = document.createElement( 'canvas' );
+		canvasTerrain.width = canvasTerrain.height =  256;
+		document.body.appendChild( canvasTerrain );
+		canvasTerrain.style.cssText = 'margin: 20px; left: 0; position: absolute; top: 0; z-index: 18; ';
+		contextTerrain = canvasTerrain.getContext( '2d' );
+
+		getImage( lat, lon )
+
+	}
+
+	function getImage( lat, lon ) {
+
+		if ( lat >= 0 ) {
+
+			fileLat =  'n' + ( '00' + lat).substr( -2 ) ;
+
+		} else {
+
+			fileLat =  's' + ( '00' + Math.abs( lat ) ).substr( -2 ) ;
+
+		}
+
+		if ( lon >= 0 ) {
+
+			fileLon =  'e' + ( '000' + lon ).substr( -3 ) ;
+
+		} else {
+
+			fileLon =  'w' + ( '000' + Math.abs( lon ) ).substr( -3 ) ;
+
+		}
+
+		var fileName =  imageDir + fileLat + fileLon + '.png';
+
+		if ( files.indexOf( fileLat + fileLon ) > -1 ) {
+
+			heightMap.src = fileName;
+
+			msg1.innerHTML = 'lat:' + lat + ' lon:' + lon + '<br>' +
+				'file:' + fileName +
+			'';
+
+		} else {
+
+			msg1.innerHTML = 'lat:' + lat + ' lon:' + lon + '<br>' +
+				'file not found:' + fileName +
+			'';
+
+		}
+
+	}
+
+
+	function updateTerrain() {
+
+//		canvasHeightMap.width = heightMap.width;
+//		canvasHeightMap.height = heightMap.height;
+
+//		contextHeightMap.drawImage( heightMap, viewLeft, viewTop, viewSize, viewSize, 0, 0, 256, 256 );
+//		contextHeightMap.drawImage( heightMap, 0, 0, heightMap.width, heightMap.height, 0, 0, 256, 256 );
+		size = 256;
+
+		var top = 3601 * parseFloat( parent.inpTop.value ) / 3601;
+		var left = 3601 * parseFloat( parent.inpLeft.value ) / 3601;
+//console.log( left, top );
+
+		contextTerrain.clearRect( 0, 0, size, size );
+		contextTerrain.drawImage( heightMap, left, top, viewSize, viewSize, 0, 0, 256, 256 );
+		var image = contextTerrain.getImageData( 0, 0, 256, 256 );
+		var rgb = image.data;
+
+		var geometry = new THREE.PlaneBufferGeometry( 256, 256, 255, 255 );
+		geometry.applyMatrix( new THREE.Matrix4().makeRotationX( 0.5 * Math.PI ) );
+
+		var vertices = geometry.attributes.position.array;
+		var elevation;
+		var scl = 0.01 * scale;
+
+		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
+
+			elevation = rgb[ i ] + 256 * rgb[ i + 1 ] + 65536 * rgb[ i + 2 ] ;
+
+			elevation = elevation < 32767 ? elevation : elevation - 16777216;
+			elevation  = elevation < -11000 ? 0 : elevation ;
+
+			vertices[ j ] = scl * elevation ;
+
+		}
+
+		geometry.computeFaceNormals();
+		geometry.computeVertexNormals();
+
+		scene.remove( terrain )
+		terrain = new THREE.Mesh( geometry, mapMaterial );
+		terrain.scale.z = -1;
+		scene.add( terrain );
+
+		setLocationMapTarget()
+
+	}
+
+	function setLocationMapTarget() {
+
+		var size = 256;
+		var top = size * parseFloat( parent.inpTop.value ) / 3601;
+		var left = size * parseFloat( parent.inpLeft.value ) / 3601;
+
+		contextHeightMap.clearRect( 0, 0, size, size );
+
+		contextHeightMap.beginPath(); //
+
+
+//		contextHeightMap.putImageData( imageLocation, 0, 0 );
+		contextHeightMap.drawImage( heightMap, 0, 0, heightMap.width, heightMap.height, 0, 0, size, size );
+
+
+		contextHeightMap.strokeStyle =  'red';
+
+		contextHeightMap.moveTo( 0, top );
+		contextHeightMap.lineTo( size, top );
+		contextHeightMap.stroke();
+
+		contextHeightMap.moveTo( left, 0 );
+		contextHeightMap.lineTo( left, size );
+		contextHeightMap.stroke();
+
+		contextHeightMap.strokeStyle =  'yellow';
+		contextHeightMap.strokeRect( left - 30, top - 30, 60, 60);
+
+		contextHeightMap.closePath();
+
+	}
+
+	function tileWest() {
+
+		lon = --lon > -180 ? lon : 179;
+
+		getImage( lat, lon );
+
+	}
+
+	function tileEast() {
+		
+		lon = ++lon < 180 ? lon : -179;
+
+		getImage( lat, lon );
+
+	}
+
+
+	function tileNorth() {
+
+		lat = ++lat < 80 ? lat : 80;
+
+		getImage( lat, lon );
+
+	}
+
+	function tileSouth() {
+
+		lat = --lat > -90 ? lat : -90;
+
+		getImage( lat, lon );
+
+	}
+
+
+	function animate() {
+
+		requestAnimationFrame( animate );
+		controls.update();
+		stats.update();
+		renderer.render( scene, camera );
+
+	}
+
+</script>
+</body>
+</html>
