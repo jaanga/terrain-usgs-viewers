@@ -79,10 +79,10 @@
 			'<p>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</p>' +
 			'<div id=msg1 ></div>' +
 			'<p id=heightMapHolder ></p>' +
-			'<p>East / West <input type=range id=inpLeft min=0 max=3601 value=2000 step=1 onmousemove=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
-			'<p>North / South <input type=range id=inpTop min=0 max=3601 value=600 step=1 onmousemove=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
-			'<p>View Size <input type=range id=inpSize min=100 max=3601 value=256 step=1 onmousemove=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
-			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=10 step=1 onmousemove=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
+			'<p>East / West <input type=range id=inpLeft min=0 max=3601 value=2100 step=0.1 onchange=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
+			'<p>North / South <input type=range id=inpTop min=0 max=3601 value=700 step=0.1 onchange=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
+			'<p>View Size <input type=range id=inpSize min=256 max=3601 value=256 step=1 onchange=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
+			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=10 step=1 onchange=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
 
 			'<p>' +
 				'Go: <button onclick=tileWest(); title="Go west" >&#8678;</button> ' +
@@ -131,8 +131,13 @@
 		canvasTerrain = document.createElement( 'canvas' );
 		canvasTerrain.width = canvasTerrain.height =  256;
 		document.body.appendChild( canvasTerrain );
-		canvasTerrain.style.cssText = 'margin: 20px; left: 0; position: absolute; top: 0; z-index: 18; ';
+		canvasTerrain.style.cssText = 'margin: 20px; right: 0; position: absolute; top: 50px; z-index: 18; ';
 		contextTerrain = canvasTerrain.getContext( '2d' );
+
+		image = document.createElement( 'img' );
+
+		document.body.appendChild( image );
+		image.style.cssText = 'border: 1px red solid; margin: 20px; position: absolute; top: 350px; right: 0px; z-index: -10; ';
 
 		getImage( lat, lon )
 
@@ -195,7 +200,7 @@
 //console.log( left, top );
 
 		contextTerrain.clearRect( 0, 0, size, size );
-		contextTerrain.drawImage( heightMap, left, top, viewSize, viewSize, 0, 0, 256, 256 );
+		contextTerrain.drawImage( heightMap, left - viewSize / 2, top - viewSize / 2, viewSize, viewSize, 0, 0, 256, 256 );
 		var image = contextTerrain.getImageData( 0, 0, 256, 256 );
 		var rgb = image.data;
 
@@ -225,7 +230,10 @@
 		terrain.scale.z = -1;
 		scene.add( terrain );
 
-		setLocationMapTarget()
+		setLocationMapTarget();
+
+
+
 
 	}
 
@@ -235,14 +243,19 @@
 		var top = size * parseFloat( parent.inpTop.value ) / 3601;
 		var left = size * parseFloat( parent.inpLeft.value ) / 3601;
 
+		hotSpot = Math.floor( 256 * viewSize / 3601 );
+
+		dLat = lat + 1 - parseFloat( parent.inpTop.value ) / 3601;
+		dLon = lon + parseFloat( parent.inpLeft.value ) / 3601;
+console.log( dLat, dLon );
+//		image.src= 'http://maps.googleapis.com/maps/api/staticmap?center=' + ( dLat ).toFixed( 5 ) + ',' + ( dLon ).toFixed( 5 ) + '&maptype=roadmap&zoom=' + 9 + '&scale=2&size=' + 256 + 'x' + 256 ;
+
 		contextHeightMap.clearRect( 0, 0, size, size );
 
 		contextHeightMap.beginPath(); //
 
-
 //		contextHeightMap.putImageData( imageLocation, 0, 0 );
 		contextHeightMap.drawImage( heightMap, 0, 0, heightMap.width, heightMap.height, 0, 0, size, size );
-
 
 		contextHeightMap.strokeStyle =  'red';
 
@@ -255,7 +268,7 @@
 		contextHeightMap.stroke();
 
 		contextHeightMap.strokeStyle =  'yellow';
-		contextHeightMap.strokeRect( left - 30, top - 30, 60, 60);
+		contextHeightMap.strokeRect( left - hotSpot / 2 , top - hotSpot / 2 , hotSpot, hotSpot );
 
 		contextHeightMap.closePath();
 
