@@ -14,26 +14,26 @@
 
 //	var fileName = 'http://i.imgur.com/I6s39Gt.png';
 //	var fileName = 'http://i.imgur.com/WHtXG7R.png';
-//	var fileName = 'http://i.imgur.com/pkW8c5Q.png';
-//	var fileName = 'http://i.imgur.com/ujk1uKo.png';
-//	var fileName = 'http://i.imgur.com/t2Rn6JL.png';
-//	var fileName = 'http://i.imgur.com/tekJR4i.png';
+	var fileName = 'http://i.imgur.com/pkW8c5Q.png';
+	var fileName = 'http://i.imgur.com/ujk1uKo.png';
+	var fileName = 'http://i.imgur.com/t2Rn6JL.png';
+	var fileName = 'http://i.imgur.com/tekJR4i.png';
 
-/*
+
 	var lat = 37;
 	var lon = -123;
 	var dLat = 37.5;
 	var dLon = -122.5;
-*/
-
+/*
 	var lat = 37;
-	var lon = -123;
+	var lon = -122;
 	var dLat = 37.796;
 	var dLon = -122.398;
+*/
 
-	var zoom = 11;
+	var zoom = 13;
 
-	var scale = 8;
+	var scale = 40;
 
 	var imageDir = 'c:/temp/usgs/04-test/';
 	var imageDir = 'http://jaanga.github.io/terrain-usgs-data-1second/images/';
@@ -74,15 +74,12 @@
 	var terrain, mapMaterial;
 
 	var viewSize = 256;
-//	var viewHeight = 256;
-//	var viewLeft = 2000;
-//	var viewTop = 600;
+	var viewHeight = 256;
+	var viewLeft = 2000;
+	var viewTop = 600;
 
-	var lat = Math.floor( dLat );
-	var quadDeltaLat = dLat - lat;
-
-	var lon = Math.floor( dLon );
-	var quadDeltaLon = dLon - lon;
+	var lon = Math.floor( dLat );
+	var quadDeltaLat = dLon - lon;
 
 	var tileXlonUL = tile2lon( lat2tile( dLon, zoom ), zoom );
 	var tileYlatUL = tile2lat( lat2tile( dLat, zoom ), zoom );
@@ -100,8 +97,8 @@
 		info.innerHTML = '<a href="" ><h3>' + document.title + '</h3></a>' +
 			'<div id=msg1 ></div>' +
 			'<p id=locationMapHolder ></p>' +
-			'<p>East / West <input type=range id=inpLeft min=0 max=1 value=' + quadDeltaLon + ' step=0.001 onchange=updateTerrain(); /></p>' +
-			'<p>North / South <input type=range id=inpTop min=0 max=1 value=' + quadDeltaLat + ' step=0.001 onchange=updateTerrain(); /></p>' +
+			'<p>East / West <input type=range id=inpLeft min=0 max=3601 value=1800 step=0.1 onchange=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
+			'<p>North / South <input type=range id=inpTop min=0 max=3601 value=1800 step=0.1 onchange=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
 			'<p>View Size <input type=range id=inpSize min=256 max=3601 value=256 step=1 onchange=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
 			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=scale step=1 onchange=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
 
@@ -162,13 +159,17 @@
 		image.crossOrigin = 'anonymous';
 		document.body.appendChild( image );
 		image.style.cssText = 'border: 1px red solid; margin: 20px; position: absolute; top: 350px; right: 0px; z-index: -10; ';
+		
 		image.onload = updateMapMaterial;
 
-		getHeightMap();
+		getImage( lat, lon )
 
 	}
 
-	function getHeightMap() {
+	function getImage() {
+
+		lat = Math.floor( dLat );
+		lon = Math.floor( dLon );
 
 		if ( lat >= 0 ) {
 
@@ -196,7 +197,7 @@
 
 			heightMap.src = fileName;
 
-			msg1.innerHTML = 'lat:' + lat + ' dLat:' + dLat + '<br>lon:' + lon + ' dLon:' + dLon + '<br>' +
+			msg1.innerHTML = 'lat:' + lat + ' lon:' + lon + '<br>' +
 				'<small>file:' + fileName + '</small>' +
 			'';
 
@@ -215,8 +216,8 @@
 
 		size = 256;
 
-		var top = 3601 * ( 1 - parseFloat( parent.inpTop.value ) );
-		var left = 3601 * parseFloat( parent.inpLeft.value );
+		var top = 3601 * parseFloat( parent.inpTop.value ) / 3601;
+		var left = 3601 * parseFloat( parent.inpLeft.value ) / 3601;
 
 		tileX = lon2tile( dLon, zoom );
 		tileY = lat2tile( dLat, zoom );
@@ -235,14 +236,13 @@
 
 		dWidth = 3601 * ( tileXlonUL - dLon );
 		dHeight = 3601 * ( tileYlatUL - dLat );
-
 /*
-console.log( 'L/T',left.toFixed(3), top.toFixed(3) );
-console.log( 'dLL', dLat.toFixed(3), dLon.toFixed(3) );
+console.log( left, top );
+console.log( dLat, dLon );
 
 console.log( 'tiles', tileX, tileY );
-console.log( tileXlonUL.toFixed(3), tileYlatUL.toFixed(3) );
-console.log( tileXlonLR.toFixed(3), tileYlatLR.toFixed(3) );
+console.log( tileXlonUL, tileYlatUL );
+console.log( tileXlonLR, tileYlatLR );
 
 console.log( 'dTile', dTileX.toFixed(3), dTileY.toFixed(3) );
 console.log( width.toFixed(3), height.toFixed(3) );
@@ -299,8 +299,8 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 			dLat = lat + 1 - y / 256;
 			dLon = lon + x / 256;
 
-			parent.inpTop.value = 1 - y / 256;
-			parent.inpLeft.value = x / 256;
+			parent.inpTop.value = 3601 * y / 256;
+			parent.inpLeft.value = 3601 * x / 256;
 
 			updateTerrain();
 
@@ -327,8 +327,8 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		var size = 256;
 
-		var top = size * ( 1 - parseFloat( parent.inpTop.value ) );
-		var left = size * parseFloat( parent.inpLeft.value );
+		var top = size * parseFloat( parent.inpTop.value ) / 3601;
+		var left = size * parseFloat( parent.inpLeft.value ) / 3601;
 
 		hotSpot = Math.floor( 256 * viewSize / 3601 );
 
@@ -363,7 +363,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		lon = --lon > -180 ? lon : 179;
 
-		getHeightMap( lat, lon );
+		getImage( lat, lon );
 
 	}
 
@@ -371,7 +371,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 		
 		lon = ++lon < 180 ? lon : -179;
 
-		getHeightMap( lat, lon );
+		getImage( lat, lon );
 
 	}
 
@@ -380,7 +380,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		lat = ++lat < 80 ? lat : 80;
 
-		getHeightMap( lat, lon );
+		getImage( lat, lon );
 
 	}
 
@@ -388,7 +388,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		lat = --lat > -90 ? lat : -90;
 
-		getHeightMap( lat, lon );
+		getImage( lat, lon );
 
 	}
 
