@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang=en >
 <head>
-<title>PNG USGS 1 Second Viewer 3D Hello World</title>
+<title>PNG USGS 1 Second Viewer 3D Map Toy</title>
 <meta charset=utf-8 />
 <meta name=viewport content='width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0' />
 </head>
@@ -11,22 +11,15 @@
 <script src=http://mrdoob.github.io/three.js/examples/js/libs/stats.min.js ></script>
 <script>
 
-
-//	var fileName = 'http://i.imgur.com/I6s39Gt.png';
-//	var fileName = 'http://i.imgur.com/WHtXG7R.png';
-	var fileName = 'http://i.imgur.com/pkW8c5Q.png';
-	var fileName = 'http://i.imgur.com/ujk1uKo.png';
-	var fileName = 'http://i.imgur.com/t2Rn6JL.png';
-	var fileName = 'http://i.imgur.com/tekJR4i.png';
-
 	var lat = 37;
 	var lon = -123;
 	var scale = 10;
 
-	var imageDir = 'c:/temp/usgs/04-test/';
+//	var imageDir = 'c:/temp/usgs/04-test/';
 	var imageDir = 'http://jaanga.github.io/terrain-usgs-data-1second/images/';
 
 	var files = [
+
 // 'n28w101','n28w104','n29w101','n29w102','n29w103','n29w104','n29w105','n30w101','n30w102','n30w103','n30w104','n30w105','n30w106','n31w101','n31w102','n31w103','n31w104','n31w105','n31w106','n31w107','n31w108','n31w109','n31w110','n31w111','n31w112','n31w113','n31w114','n32w101','n32w102','n32w103','n32w104','n32w105','n32w106','n32w107','n32w108','n32w109','n32w110','n32w111','n32w112','n32w113','n32w114',
 
 		'n32w115','n32w116','n32w117','n32w118','n32w119',
@@ -73,16 +66,14 @@
 		css.innerHTML ='body { font: 600 12pt monospace; margin: 0; overflow: hidden; }' ;
 
 		var info = document.body.appendChild( document.createElement( 'div' ) );
-		info.style.cssText = 'margin: 20px; position: absolute; ';
-		info.innerHTML = '<a href="" ><h1>' + document.title + '</h1></a>' +
-			'<p>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</p>' +
+		info.style.cssText = 'margin: 0 20px; max-width: 200px; position: absolute; ';
+		info.innerHTML = '<a href="" ><h3>' + document.title + '</h3></a>' +
+			'<p>Move the East/West & North/South sliders a bit. Then have fun with the Size and Scale sliders.</p>' +
 			'<div id=msg1 ></div>' +
 			'<p>East / West <input type=range id=inpLeft min=0 max=3345 value=2000 step=1 onmousemove=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
 			'<p>North / South <input type=range id=inpTop min=0 max=3345 value=600 step=1 onmousemove=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
 			'<p>View Size <input type=range id=inpSize min=100 max=3601 value=256 step=1 onmousemove=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
 			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=10 step=1 onmousemove=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
-
-
 			'<p>' +
 				'Go: <button onclick=tileWest(); title="Go west" >&#8678;</button> ' +
 				'<button onclick=tileEast(); title="Go east"  >&#8680;</button> ' +
@@ -90,6 +81,7 @@
 				'<button onclick=tileNorth(); title="Go north" >&#8679;</button> ' +
 				'<button onclick=tileSouth(); title="Go south" >&#8681;</button> ' +
 			'</p>' +
+			'<p><small>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</small></p>' +
 		'';
 
 		stats = new Stats();
@@ -159,7 +151,7 @@
 			heightMap.src = fileName;
 
 			msg1.innerHTML = 'lat:' + lat + ' lon:' + lon + '<br>' +
-				'file:' + fileName +
+				'<small>file:' + fileName + '</small>' +
 			'';
 
 		} else {

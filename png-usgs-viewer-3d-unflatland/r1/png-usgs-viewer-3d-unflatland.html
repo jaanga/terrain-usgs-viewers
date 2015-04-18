@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang=en >
 <head>
-<title>PNG USGS 1 Second Viewer 3D Hello World</title>
+<title>PNG USGS 1 Second Viewer 3D unFlatland R1</title>
 <meta charset=utf-8 />
 <meta name=viewport content='width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0' />
 </head>
@@ -100,6 +100,7 @@
 		info.innerHTML = '<a href="" ><h3>' + document.title + '</h3></a>' +
 			'<div id=msg1 ></div>' +
 			'<p id=locationMapHolder ></p>' +
+			'<p>Click in the height map to go there.</p>' +
 			'<p>East / West <input type=range id=inpLeft min=0 max=1 value=' + quadDeltaLon + ' step=0.001 onchange=updateTerrain(); /></p>' +
 			'<p>North / South <input type=range id=inpTop min=0 max=1 value=' + quadDeltaLat + ' step=0.001 onchange=updateTerrain(); /></p>' +
 			'<p>View Size <input type=range id=inpSize min=256 max=3601 value=256 step=1 onchange=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
