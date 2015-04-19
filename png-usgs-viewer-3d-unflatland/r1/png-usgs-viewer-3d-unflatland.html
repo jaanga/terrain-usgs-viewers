@@ -31,7 +31,7 @@
 	var dLat = 37.796;
 	var dLon = -122.398;
 
-	var zoom = 11;
+	var zoom = 12;
 
 	var scale = 8;
 
@@ -100,8 +100,9 @@
 		info.innerHTML = '<a href="" ><h3>' + document.title + '</h3></a>' +
 			'<p><a href="http://jaanga.github.io/terrain-srtm30-plus-viewers/png-tms7-viewer-3d-globe-low/latest/index.html" >3D Globe</a></p>' +
 			'<div id=msg1 ></div>' +
-			'<p id=locationMapHolder ></p>' +
+			'<p id=locationMapHolder ></p>' + 
 			'<p>Click in the height map to go there.</p>' +
+			'<p><select id=selZoom onchange=updateTerrain(); /></select></p>' +
 			'<p>East / West <input type=range id=inpLeft min=0 max=1 value=' + quadDeltaLon + ' step=0.001 onchange=updateTerrain(); /></p>' +
 			'<p>North / South <input type=range id=inpTop min=0 max=1 value=' + quadDeltaLat + ' step=0.001 onchange=updateTerrain(); /></p>' +
 			'<p>View Size <input type=range id=inpSize min=256 max=3601 value=256 step=1 onchange=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
@@ -117,6 +118,13 @@
 			'<p><small>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</small></p>' +
 
 		'';
+
+		for (var i = 0; i < 7; i++) {
+				selZoom.appendChild( document.createElement( 'option' ) );
+				selZoom.children[ i ].text = 'zoom level ' + ( i + 9 );
+		}
+
+		selZoom.selectedIndex = 3;
 
 		stats = new Stats();
 		stats.domElement.style.cssText = 'position: absolute; right: 0; top: 0; z-index: 100; ';
@@ -216,6 +224,7 @@
 	function updateTerrain() {
 
 		size = 256;
+		zoom = parseInt( selZoom.selectedIndex, 10 ) + 7;
 
 		var top = 3601 * ( 1 - parseFloat( parent.inpTop.value ) );
 		var left = 3601 * parseFloat( parent.inpLeft.value );
