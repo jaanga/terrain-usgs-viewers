@@ -107,9 +107,7 @@
 		if ( xmlHttp.readyState !== 4  ) { return; }
 
 		var zip = new JSZip( xmlHttp.response );
-
 		var keys = Object.keys( zip.files );
-
 		var fileName = keys[ 0 ];
 
 		byteArray = zip.file( fileName ).asUint8Array();
@@ -186,6 +184,7 @@
 		renderer.render( scene, camera );
 
 	}
+
 
 </script>
 </body>
