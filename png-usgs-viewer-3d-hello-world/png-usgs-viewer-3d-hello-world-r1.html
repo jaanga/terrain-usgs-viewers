@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang=en >
+<head>
+<title>PNG USGS 1 Second Viewer 3D Hello World</title>
+<meta charset=utf-8 />
+<meta name=viewport content='width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0' />
+</head>
+<body>
+<script src=http://mrdoob.github.io/three.js/build/three.min.js ></script>
+<script src=http://mrdoob.github.io/three.js/examples/js/controls/OrbitControls.js ></script>
+<script src=http://mrdoob.github.io/three.js/examples/js/libs/stats.min.js ></script>
+<script>
+
+
+	var scale = 10;
+	var viewSize = 3601;
+
+	var viewLeft = 0;
+	var viewTop = 0;	
+
+	var fileName = 'n37w123.png';
+
+//	var imageDir = 'c:/temp/usgs/04-test/';
+//	var imageDir = 'http://jaanga.github.io/terrain-usgs-data-1second/images/';
+	var imageDir = 'c:/temp/usgs/earth-explorer/';
+
+	var stats, renderer, scene, camera, controls;
+	var geometry, material, mesh, axisHelper;
+
+	var heightMap, canvasHeightMap, contextHeightMap;
+	var terrain, mapMaterial;
+
+	init();
+	animate();
+
+	function init() {
+
+		var css = document.head.appendChild( document.createElement('style') );
+		css.innerHTML ='body { font: 600 12pt monospace; margin: 0; overflow: hidden; }' ;
+
+		var info = document.body.appendChild( document.createElement( 'div' ) );
+		info.style.cssText = 'margin: 0 20px; max-width: 200px; position: absolute; ';
+		info.innerHTML = '<a href="" ><h3>' + document.title + '</h3></a>' +
+			'<p>Move the East/West & North/South sliders a bit. Then have fun with the Size and Scale sliders.</p>' +
+			'<div id=msg1 ></div>' +
+			'<p>East / West <input type=range id=inpLeft min=0 max=3345 value=' + viewLeft + ' step=1 onmousemove=viewLeft=parseFloat(inpLeft.value);updateTerrain(); /></p>' +
+			'<p>North / South <input type=range id=inpTop min=0 max=3345 value=' + viewTop + ' step=1 onmousemove=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
+			'<p>View Size <input type=range id=inpSize min=100 max=3601 value=' + viewSize + ' step=1 onmousemove=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
+			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=' + scale + ' step=1 onmousemove=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
+		'';
+
+		stats = new Stats();
+		stats.domElement.style.cssText = 'position: absolute; right: 0; top: 0; z-index: 100; ';
+		document.body.appendChild( stats.domElement );
+
+		renderer = new THREE.WebGLRenderer( { alpha: 1, antialias: true, clearColor: 0xffffff }  );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );
+
+		camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
+		camera.position.set( 200, 200, 200 );
+
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+		scene = new THREE.Scene();
+
+// axes
+		var axisHelper = new THREE.AxisHelper( 50 );
+		scene.add( axisHelper );
+
+		mapMaterial = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading, side: 2 } );
+
+//
+		heightMap = document.createElement( 'img' );
+//		document.body.appendChild( heightMap );
+//		heightMap.style.cssText = 'margin: 20px; position: absolute; top: 0; z-index: -10; ';
+
+		heightMap.crossOrigin = 'anonymous';
+		heightMap.onload = updateTerrain;
+		heightMap.src = imageDir + fileName;
+
+		canvasHeightMap = document.createElement( 'canvas' );
+		canvasHeightMap.width = canvasHeightMap.height =  256;
+		contextHeightMap = canvasHeightMap.getContext( '2d' );
+
+		msg1.innerHTML = 'file:' + fileName + '';
+
+	}
+
+
+	function updateTerrain() {
+
+		contextHeightMap.drawImage( heightMap, viewLeft, viewTop, viewSize, viewSize, 0, 0, 256, 256 );
+
+		var image = contextHeightMap.getImageData( 0, 0, 256, 256 );
+		var rgb = image.data;
+
+		var geometry = new THREE.PlaneBufferGeometry( 256, 256, 255, 255 );
+		geometry.applyMatrix( new THREE.Matrix4().makeRotationX( 0.5 * Math.PI ) );
+
+		var vertices = geometry.attributes.position.array;
+		var elevation;
+		var scl = 0.01 * scale;
+
+		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
+
+			elevation = rgb[ i ] + 256 * rgb[ i + 1 ] + 65536 * rgb[ i + 2 ] ;
+
+			elevation = elevation < 32767 ? elevation : elevation - 16777216;
+
+// uncomment to see the errors fixed, but should not need this correction
+// the d ata should come in already fixed
+//			elevation  = elevation < -11000 ? 0 : elevation ;
+
+			vertices[ j ] = scl * elevation ;
+
+		}
+
+		geometry.computeFaceNormals();
+		geometry.computeVertexNormals();
+
+		scene.remove( terrain )
+		terrain = new THREE.Mesh( geometry, mapMaterial );
+		terrain.scale.z = -1;
+		scene.add( terrain );
+
+	}
+
+
+	function animate() {
+
+		requestAnimationFrame( animate );
+		controls.update();
+		stats.update();
+		renderer.render( scene, camera );
+
+	}
+
+</script>
+</body>
+</html>
