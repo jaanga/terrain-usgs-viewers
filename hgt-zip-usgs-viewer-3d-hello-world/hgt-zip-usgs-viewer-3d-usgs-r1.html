@@ -15,15 +15,21 @@
 
 	var scale = 10;
 	var viewSize = 3601;
+//	var viewSize = 1201;
 
 	var viewLeft = 0;
 	var viewTop = 0;	
 
-	var fileName = 'N20W157.hgt.zip';
+	var fileName = 'N40W004.hgt.zip';
 
 	var sourceDir = 'http://jaanga.github.io/terrain-usgs-data-1second/hgt-zip/';
 	var sourceDir = 'http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_07/';
+	var sourceDir = 'http://cloudcapsupport.com/elevation/World-90m/';
 
+	var sourceDir = 'c:/temp/';
+	var sourceDir = 'c:/temp/de-ferranti/1degree-zips/';
+//	var sourceDir = 'c:/temp/usgs/04/';
+//	var sourceDir = 'http://caper.ws/terrain/de-ferranti/1degree/';
 
 	var stats, renderer, scene, camera, controls;
 	var geometry, vertices, material, mesh, axisHelper;
@@ -78,17 +84,39 @@
 		canvasHeightMap = document.createElement( 'canvas' );
 //		document.body.appendChild( canvasHeightMap );
 //		canvasHeightMap.style.cssText = ' border: 5px solid red; margin: 20px; position: absolute; top: 0; z-index: -10; ';
-		canvasHeightMap.width = canvasHeightMap.height =  3601;
+		canvasHeightMap.width = canvasHeightMap.height =  viewSize;
 
 		contextHeightMap = canvasHeightMap.getContext( '2d' );
 
-		imageHeightMap = contextHeightMap.createImageData( 3601, 3601 );
+		imageHeightMap = contextHeightMap.createImageData( viewSize, viewSize );
 
 		canvasTerrain = document.createElement( 'canvas' );
 		canvasTerrain.width = canvasTerrain.height = 256;
 		contextTerrain = canvasTerrain.getContext( '2d' );
 
-		requestFile( sourceDir + fileName );
+		if ( !location.hash ) {
+
+			fileName = sourceDir + fileName;
+
+
+		} else {
+
+			fileName = location.hash.split( '#' )[1];
+		}
+
+		window.addEventListener ( 'hashchange', onHashChange, false );
+
+		requestFile( fileName );
+
+	}
+
+	function onHashChange() {
+
+		var hashes = location.hash.split ( '#' );
+
+		if ( hashes.length < 2 ) { return; } 
+
+		requestFile( sourceDir + hashes[ 1 ] );
 
 	}
 
@@ -113,6 +141,9 @@
 		var keys = Object.keys( zip.files );
 		var fileName = keys[ 0 ];
 
+console.log( zip.files, fileName );
+
+// fileName = 'N57W007.hgt';
 		byteArray = zip.file( fileName ).asUint8Array();
 
 		parseHGT();
@@ -140,7 +171,7 @@
 		}
 
 		contextHeightMap.putImageData( imageHeightMap, 0, 0 );
-
+console.log( png.length );
 		updateTerrain();
 	}
 
@@ -162,7 +193,7 @@
 // uncomment the next line of code to see the errors corrected, but we should not need this correction
 // the data should come in already without error
 
-//			elevation  = elevation < -11000 ? 0 : elevation ;
+			elevation  = elevation < -11000 ? 0 : elevation ;
 
 			vertices[ j ] = scl * elevation ;
 
