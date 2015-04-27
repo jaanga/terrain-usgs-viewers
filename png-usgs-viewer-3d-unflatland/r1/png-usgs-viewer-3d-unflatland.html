@@ -99,7 +99,7 @@
 		info.style.cssText = 'margin: 0 20px; max-width: 300px; position: absolute;';
 		info.innerHTML = '<a href="" ><h3>' + document.title + '</h3></a>' +
 			'<p><a href="http://jaanga.github.io/terrain-srtm30-plus-viewers/png-tms7-viewer-3d-globe-low/latest/index.html" >3D Globe</a></p>' +
-			'<div id=msg1 ></div>' +
+
 			'<p id=locationMapHolder ></p>' + 
 			'<p>Click in the height map to go there.</p>' +
 			'<p><select id=selZoom onchange=updateTerrain(); /></select></p>' +
@@ -116,7 +116,7 @@
 				'<button onclick=tileSouth(); title="Go south" >&#8681;</button> ' +
 			'</p>' +
 			'<p><small>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</small></p>' +
-
+			'<div id=msg1 ></div>' +
 		'';
 
 		for (var i = 0; i < 10; i++) {
@@ -213,7 +213,7 @@
 		} else {
 
 			msg1.innerHTML = 'lat:' + lat + ' lon:' + lon + '<br>' +
-				'file not found:' + fileName +
+				'<span style=color:red; >file not found:<br>' + fileName + '</span>' +
 			'';
 
 		}
@@ -229,6 +229,9 @@
 		var top = 3601 * ( 1 - parseFloat( parent.inpTop.value ) );
 		var left = 3601 * parseFloat( parent.inpLeft.value );
 
+		dLon = lon + parseFloat( parent.inpLeft.value );
+		dLat = lat + parseFloat( parent.inpTop.value );
+
 		tileX = lon2tile( dLon, zoom );
 		tileY = lat2tile( dLat, zoom );
 
@@ -241,8 +244,8 @@
 		dTileX = tileXlonLR - tileXlonUL;
 		dTileY = tileYlatUL - tileYlatLR;
 
-		width = 3601 * dTileX;
-		height = 3601 * dTileY;
+		vWidth = 3601 * dTileX;
+		vHeight = 3601 * dTileY;
 
 		dWidth = 3601 * ( tileXlonUL - dLon );
 		dHeight = 3601 * ( tileYlatUL - dLat );
@@ -261,7 +264,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 */
 
 		contextTerrain.clearRect( 0, 0, size, size );
-		contextTerrain.drawImage( heightMap, left + dWidth, top - dHeight, width, height, 0, 0, size, size );
+		contextTerrain.drawImage( heightMap, left + dWidth, top - dHeight, vWidth, vHeight, 0, 0, size, size );
 
 //		contextTerrain.strokeRect( 128 , 128 , 20, 20 );
 
@@ -341,7 +344,8 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 		var top = size * ( 1 - parseFloat( parent.inpTop.value ) );
 		var left = size * parseFloat( parent.inpLeft.value );
 
-		hotSpot = Math.floor( 256 * viewSize / 3601 );
+		hotSpotWidth = Math.floor( 256 * vWidth / 3601 );
+		hotSpotHeight = Math.floor( 256 * vHeight / 3601 );
 
 //		image.src = 'http://maps.googleapis.com/maps/api/staticmap?center=' + ( dLat ).toFixed( 5 ) + ',' + ( dLon ).toFixed( 5 ) + '&maptype=roadmap&zoom=' + 12 + '&scale=2&size=' + 358 + 'x' + 256 ;
 
@@ -364,7 +368,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 		contextLocationMap.stroke();
 
 		contextLocationMap.strokeStyle =  'yellow';
-		contextLocationMap.strokeRect( left - hotSpot / 2 , top - hotSpot / 2 , hotSpot, hotSpot );
+		contextLocationMap.strokeRect( left - hotSpotWidth / 2 , top - hotSpotHeight / 2 , hotSpotWidth, hotSpotHeight );
 
 		contextLocationMap.closePath();
 
@@ -373,7 +377,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 	function tileWest() {
 
 		lon = --lon > -180 ? lon : 179;
-
+		dLon = --dLon > -180 ? dLon : 179;
 		getHeightMap();
 
 	}
@@ -381,7 +385,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 	function tileEast() {
 		
 		lon = ++lon < 180 ? lon : -179;
-
+		dLon = ++dLon < 180 ? dLon : -179;
 		getHeightMap();
 
 	}
@@ -390,7 +394,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 	function tileNorth() {
 
 		lat = ++lat < 80 ? lat : 80;
-
+		dLat = ++dLat < 80 ? dLat : 80;
 		getHeightMap();
 
 	}
@@ -398,7 +402,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 	function tileSouth() {
 
 		lat = --lat > -90 ? lat : -90;
-
+		dLat = --dLat > -90 ? dLat : -90;
 		getHeightMap();
 
 	}
