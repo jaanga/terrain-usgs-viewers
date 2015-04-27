@@ -105,7 +105,7 @@
 			'<p><select id=selZoom onchange=updateTerrain(); /></select></p>' +
 			'<p>East / West <input type=range id=inpLeft min=0 max=1 value=' + quadDeltaLon + ' step=0.001 onchange=updateTerrain(); /></p>' +
 			'<p>North / South <input type=range id=inpTop min=0 max=1 value=' + quadDeltaLat + ' step=0.001 onchange=updateTerrain(); /></p>' +
-//			'<p>View Size <input type=range id=inpSize min=256 max=3601 value=256 step=1 onchange=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
+			'<p>View Size <input type=range id=inpSize min=256 max=3601 value=256 step=1 onchange=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
 			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=scale step=1 onchange=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
 
 			'<p>' +
@@ -374,7 +374,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		lon = --lon > -180 ? lon : 179;
 
-		getHeightMap();
+		getHeightMap( lat, lon );
 
 	}
 
@@ -382,7 +382,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 		
 		lon = ++lon < 180 ? lon : -179;
 
-		getHeightMap();
+		getHeightMap( lat, lon );
 
 	}
 
@@ -391,7 +391,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		lat = ++lat < 80 ? lat : 80;
 
-		getHeightMap();
+		getHeightMap( lat, lon );
 
 	}
 
@@ -399,7 +399,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		lat = --lat > -90 ? lat : -90;
 
-		getHeightMap();
+		getHeightMap( lat, lon );
 
 	}
 

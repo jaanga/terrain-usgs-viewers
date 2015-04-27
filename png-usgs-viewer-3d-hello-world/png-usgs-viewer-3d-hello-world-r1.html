@@ -90,6 +90,7 @@
 
 	function updateTerrain() {
 
+		contextHeightMap.clearRect( 0, 0, 256, 256 );
 		contextHeightMap.drawImage( heightMap, viewLeft, viewTop, viewSize, viewSize, 0, 0, 256, 256 );
 
 		var image = contextHeightMap.getImageData( 0, 0, 256, 256 );
@@ -104,13 +105,13 @@
 
 		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
 
-			elevation = rgb[ i ] + 256 * rgb[ i + 1 ] + 65536 * rgb[ i + 2 ] ;
+			elevation = rgb[ i ] + ( rgb[ i + 1 ] << 7 ) + 65536 * rgb[ i + 2 ] ;
 
 			elevation = elevation < 32767 ? elevation : elevation - 16777216;
 
 // uncomment to see the errors fixed, but should not need this correction
-// the d ata should come in already fixed
-//			elevation  = elevation < -11000 ? 0 : elevation ;
+// the data should come in already fixed
+			elevation  = elevation < -11000 ? 0 : elevation ;
 
 			vertices[ j ] = scl * elevation ;
 

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang=en >
 <head>
-<title>HGT ZIP USGS 1 Second Viewer 3D Hello World</title>
+<title>HGT ZIP USGS 1 Second Viewer 3D Hello World R1</title>
 <meta charset=utf-8 />
 <meta name=viewport content='width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0' />
 </head>
@@ -12,7 +12,6 @@
 <script src=https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js ></script>
 <script>
 
-
 	var scale = 10;
 	var viewSize = 3601;
 //	var viewSize = 1201;
@@ -20,7 +19,7 @@
 	var viewLeft = 0;
 	var viewTop = 0;	
 
-	var fileName = 'N40W004.hgt.zip';
+	var fileName = 'N37W123.hgt.zip';  // dingle
 
 	var sourceDir = 'http://jaanga.github.io/terrain-usgs-data-1second/hgt-zip/';
 	var sourceDir = 'http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_07/';
@@ -28,7 +27,8 @@
 
 	var sourceDir = 'c:/temp/';
 	var sourceDir = 'c:/temp/de-ferranti/1degree-zips/';
-//	var sourceDir = 'c:/temp/usgs/04/';
+	var sourceDir = 'c:/temp/usgs/04/';
+//	var sourceDir = 'http://caper.ws/terrain/usgs/Region_04/';
 //	var sourceDir = 'http://caper.ws/terrain/de-ferranti/1degree/';
 
 	var stats, renderer, scene, camera, controls;
@@ -89,10 +89,20 @@
 		contextHeightMap = canvasHeightMap.getContext( '2d' );
 
 		imageHeightMap = contextHeightMap.createImageData( viewSize, viewSize );
+		png = imageHeightMap.data;
 
 		canvasTerrain = document.createElement( 'canvas' );
 		canvasTerrain.width = canvasTerrain.height = 256;
 		contextTerrain = canvasTerrain.getContext( '2d' );
+
+		THREE.ImageUtils.crossOrigin = 'anonymous';
+
+		imageOverlay = document.createElement( 'img' );
+		imageOverlay.crossOrigin = 'anonymous';
+		document.body.appendChild( imageOverlay );
+		imageOverlay.style.cssText = 'border: 1px red solid; margin: 20px; position: absolute; top: 30px; right: 0px; z-index: -10; ';
+		imageOverlay.onload = updateMapMaterial;
+
 
 		if ( !location.hash ) {
 
@@ -101,7 +111,7 @@
 
 		} else {
 
-			fileName = location.hash.split( '#' )[1];
+			fileName = location.hash.split( '#' )[ 1 ];
 		}
 
 		window.addEventListener ( 'hashchange', onHashChange, false );
@@ -116,13 +126,11 @@
 
 		if ( hashes.length < 2 ) { return; } 
 
-		requestFile( sourceDir + hashes[ 1 ] );
+		requestFile( hashes[ 1 ] );
 
 	}
 
 	function requestFile( fileName ) {
-
-		startTime = Date.now();
 
 		xmlHttp = new XMLHttpRequest();
 		xmlHttp.open( 'GET', fileName, true );
@@ -141,26 +149,25 @@
 		var keys = Object.keys( zip.files );
 		var fileName = keys[ 0 ];
 
-console.log( zip.files, fileName );
+// console.log( zip.files, fileName );
 
-// fileName = 'N57W007.hgt';
 		byteArray = zip.file( fileName ).asUint8Array();
 
 		parseHGT();
 
-		parent.msg1.innerHTML = msg1.innerHTML = 'file:' + fileName + ' bytes:' + byteArray.length;
+		msg1.innerHTML = 'file:' + fileName + ' bytes:' + byteArray.length;
 
 	}
 
 
 	function parseHGT() {
 
-		var png = imageHeightMap.data;
+
 		var elevation;
 
 		for ( var i = 0, j = 0; i < byteArray.length; ) {
 
-			elevation = 256 * byteArray[ i++ ] + byteArray[ i++ ] ;
+			elevation = ( byteArray[ i++ ] << 7 ) + byteArray[ i++ ] ;
 			elevation = elevation < 32768 ? elevation: elevation - 65535;
 
 			png[ j++ ] = elevation & 0x0000ff;
@@ -171,13 +178,14 @@ console.log( zip.files, fileName );
 		}
 
 		contextHeightMap.putImageData( imageHeightMap, 0, 0 );
-console.log( png.length );
+
 		updateTerrain();
 	}
 
 
 	function updateTerrain() {
 
+		contextTerrain.clearRect( 0, 0, 256, 256 );
 		contextTerrain.drawImage( canvasHeightMap, viewLeft, viewTop, viewSize, viewSize, 0, 0, 256, 256 );
 
 		var rgb = contextTerrain.getImageData( 0, 0, 256, 256 ).data;
@@ -193,7 +201,7 @@ console.log( png.length );
 // uncomment the next line of code to see the errors corrected, but we should not need this correction
 // the data should come in already without error
 
-			elevation  = elevation < -11000 ? 0 : elevation ;
+			elevation  = elevation < -11000 || elevation > 3000 ? 0 : elevation ;
 
 			vertices[ j ] = scl * elevation ;
 
@@ -207,9 +215,56 @@ console.log( png.length );
 		terrain.scale.z = -1;
 		scene.add( terrain );
 
+		setLocationMapTarget();
+
 	}
 
 
+	function updateMapMaterial() {
+
+		var texture = new THREE.Texture( imageOverlay );
+		texture.minFilter = texture.magFilter = THREE.NearestFilter;
+		texture.needsUpdate = true;
+
+		var mapMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, map: texture, shading: THREE.SmoothShading, side: 2 } );
+
+		if ( terrain ) {
+
+			terrain.material = mapMaterial;
+			terrain.material.needsUpdate = true;
+
+		}
+
+	}
+
+	function setLocationMapTarget() {
+
+		f = fileName.substr( fileName.lastIndexOf( '/') + 1, 7 );
+
+console.log( 'fn', fileName, f );
+
+		lat = parseFloat( f.substr( 1, 2 ) ) + 0.5;
+		lat = f.substr( 0, 1 ) === 'N' ? lat : -lat;
+
+		lon = parseFloat( f.substr( 4, 3 ) ) - 0.5;
+		lon = f.substr( 3, 1 ) === 'E' ? lon : -lon;
+
+		var size = 256;
+
+//		var top = size * ( 1 - parseFloat( parent.inpTop.value ) );
+//		var left = size * parseFloat( parent.inpLeft.value );
+
+//		hotSpot = Math.floor( 256 * viewSize / 3601 );
+
+		imageOverlay.src = 'http://maps.googleapis.com/maps/api/staticmap?center=' + lat + ',' + lon + '&maptype=hybrid&zoom=' + 8 + '&scale=2&size=' + 180 + 'x' + 240 + 
+			'&markers=color:blue|38,-123|38,-122|37,-123|37,-122'
+		;
+
+//
+//		image.src = 'http://mt1.google.com/vt/lyrs=y&x=' + tileX + '&y=' + tileY  + '&z=' + zoom + '&scale=2';
+
+
+		}
 	function animate() {
 
 		requestAnimationFrame( animate );
