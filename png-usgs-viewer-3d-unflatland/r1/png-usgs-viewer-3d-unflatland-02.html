@@ -11,15 +11,30 @@
 <script src=http://mrdoob.github.io/three.js/examples/js/libs/stats.min.js ></script>
 <script>
 
+
+//	var fileName = 'http://i.imgur.com/I6s39Gt.png';
+//	var fileName = 'http://i.imgur.com/WHtXG7R.png';
+//	var fileName = 'http://i.imgur.com/pkW8c5Q.png';
+//	var fileName = 'http://i.imgur.com/ujk1uKo.png';
+//	var fileName = 'http://i.imgur.com/t2Rn6JL.png';
+//	var fileName = 'http://i.imgur.com/tekJR4i.png';
+
+//	var lat = 37;
+//	var lon = -123;
 	var dLat = 37.796;  // sf
 	var dLon = -122.398; // sf
 
 	var lat = Math.floor( dLat );
+//	var quadDeltaLat = dLat - lat;
+
 	var lon = Math.floor( dLon );
+//	var quadDeltaLon = dLon - lon;
+
+//	var tileXlonUL = tile2lon( lat2tile( dLon, zoom ), zoom );
+//	var tileYlatUL = tile2lat( lat2tile( dLat, zoom ), zoom );
 
 	var zoom = 12;
 	var scale = 8;
-	var tile = 256;
 
 //	var imageDir = 'c:/temp/usgs/04-test/';
 	var imageDir = 'http://jaanga.github.io/terrain-usgs-data-1second/images/';
@@ -132,13 +147,13 @@
 		heightMap.onload = updateTerrain;
 
 		canvasLocationMap = locationMapHolder.appendChild( document.createElement( 'canvas' ) );
-		canvasLocationMap.width = tile; canvasLocationMap.height = tile;
+		canvasLocationMap.width = 256; canvasLocationMap.height = 256;
 		canvasLocationMap.style.cssText = 'border: 1px red solid; /* position: absolute; top: 0; left: 6px;  z-index: 10; */ ';
 		canvasLocationMap.onclick = onMapClick;
 		contextLocationMap = canvasLocationMap.getContext( '2d' );
 
 		canvasTerrain = document.createElement( 'canvas' );
-		canvasTerrain.width = canvasTerrain.height =  tile;
+		canvasTerrain.width = canvasTerrain.height =  256;
 		document.body.appendChild( canvasTerrain );
 		canvasTerrain.style.cssText = 'margin: 20px; right: 0; position: absolute; top: 50px; z-index: 18; ';
 		contextTerrain = canvasTerrain.getContext( '2d' );
@@ -192,7 +207,7 @@
 
 	function updateTerrain() {
 
-//		size = 256;
+		size = 256;
 		zoom = parseInt( selZoom.selectedIndex, 10 ) + 7;
 
 		var top = 3601 * ( 1 - parseFloat( parent.inpTop.value ) );
@@ -232,13 +247,15 @@ console.log( width.toFixed(3), height.toFixed(3) );
 console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 */
 
-		contextTerrain.clearRect( 0, 0, tile, tile );
-		contextTerrain.drawImage( heightMap, left + dWidth, top - dHeight, vWidth, vHeight, 0, 0, tile, tile );
+		contextTerrain.clearRect( 0, 0, size, size );
+		contextTerrain.drawImage( heightMap, left + dWidth, top - dHeight, vWidth, vHeight, 0, 0, size, size );
 
-		var image = contextTerrain.getImageData( 0, 0, tile, tile );
+//		contextTerrain.strokeRect( 128 , 128 , 20, 20 );
+
+		var image = contextTerrain.getImageData( 0, 0, size, size );
 		var rgb = image.data;
 
-		var geometry = new THREE.PlaneBufferGeometry( tile, tile, 255, 255 );
+		var geometry = new THREE.PlaneBufferGeometry( 256, 256, 255, 255 );
 		geometry.applyMatrix( new THREE.Matrix4().makeRotationX( 0.5 * Math.PI ) );
 
 		var vertices = geometry.attributes.position.array;
@@ -287,11 +304,11 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 			var x = e.offsetX;
 			var y = e.offsetY;
 
-			dLat = lat + 1 - y / tile;
-			dLon = lon + x / tile;
+			dLat = lat + 1 - y / 256;
+			dLon = lon + x / 256;
 
-			parent.inpTop.value = 1 - y / tile;
-			parent.inpLeft.value = x / tile;
+			parent.inpTop.value = 1 - y / 256;
+			parent.inpLeft.value = x / 256;
 
 			updateTerrain();
 
@@ -302,34 +319,34 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 	function setLocationMapTarget() {
 
-		var top = tile * ( 1 - parseFloat( parent.inpTop.value ) );
-		var left = tile * parseFloat( parent.inpLeft.value );
+		var size = 256;
 
-		hotSpotWidth = Math.floor( tile * vWidth / 3601 );
-		hotSpotHeight = Math.floor( tile * vHeight / 3601 );
+		var top = size * ( 1 - parseFloat( parent.inpTop.value ) );
+		var left = size * parseFloat( parent.inpLeft.value );
 
-		contextLocationMap.clearRect( 0, 0, tile, tile );
+		hotSpotWidth = Math.floor( size * vWidth / 3601 );
+		hotSpotHeight = Math.floor( size * vHeight / 3601 );
+
+		contextLocationMap.clearRect( 0, 0, size, size );
 
 		contextLocationMap.beginPath(); //
 
-		contextLocationMap.drawImage( heightMap, 0, 0, heightMap.width, heightMap.height, 0, 0, tile, tile );
+		contextLocationMap.drawImage( heightMap, 0, 0, heightMap.width, heightMap.height, 0, 0, size, size );
 
 		contextLocationMap.strokeStyle =  'red';
 
 		contextLocationMap.moveTo( 0, top );
-		contextLocationMap.lineTo( tile, top );
+		contextLocationMap.lineTo( size, top );
 		contextLocationMap.stroke();
 
 		contextLocationMap.moveTo( left, 0 );
-		contextLocationMap.lineTo( left, tile );
+		contextLocationMap.lineTo( left, size );
 		contextLocationMap.stroke();
 
 		contextLocationMap.strokeStyle =  'yellow';
 		contextLocationMap.strokeRect( left - hotSpotWidth / 2 , top - hotSpotHeight / 2 , hotSpotWidth, hotSpotHeight );
 
 		contextLocationMap.closePath();
-
-setMapOverlay();
 
 	}
 
@@ -363,13 +380,13 @@ setMapOverlay();
 	function setMapOverlay() {
 
 		if ( parent.selMap.selectedIndex === 0 ) {
-console.log( 'kui' );
+
 			mapMaterial = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading, side: 2 } );
 			terrain.material = mapMaterial;
 			terrain.material.needsUpdate = true;
 
 		} else if ( parent.selMap.selectedIndex > 0 && parent.selMap.selectedIndex < 10 ){
-
+console.log( 'kui' );
 			var dir = mapTypes[ parent.selMap.selectedIndex ][ 1 ]; // 'http://b.tile.openstreetmap.org/';
 			var count = 0;
 
@@ -381,6 +398,8 @@ console.log( 'kui' );
 //			document.body.appendChild( mapOverlay );
 //			mapOverlay.style.cssText = 'border: 1px solid gray; position: absolute; top: 0; z-index:-10;';
 			var contextMapOverlay = mapOverlay.getContext( '2d' );
+
+
 
 			for ( var x = 0; x < 8; x++ ) {
 
