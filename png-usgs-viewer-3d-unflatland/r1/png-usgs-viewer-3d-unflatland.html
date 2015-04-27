@@ -329,7 +329,7 @@ console.log( 'dW/H', dWidth.toFixed(3), dHeight.toFixed(3) );
 
 		contextLocationMap.closePath();
 
-setMapOverlay();
+		setMapOverlay();
 
 	}
 
@@ -346,7 +346,7 @@ setMapOverlay();
 			['MapQuest OSM', 'http://otile3.mqcdn.com/tiles/1.0.0/osm/'],
 			['MapQuest Satellite', 'http://otile3.mqcdn.com/tiles/1.0.0/sat/'],
 			['Stamen terrain background','http://tile.stamen.com/terrain-background/'],
-			['HeightMap','../../../terrain/'],
+			['HeightMap',''],
 			['Wireframe','']
 		];
 
@@ -363,7 +363,7 @@ setMapOverlay();
 	function setMapOverlay() {
 
 		if ( parent.selMap.selectedIndex === 0 ) {
-console.log( 'kui' );
+
 			mapMaterial = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading, side: 2 } );
 			terrain.material = mapMaterial;
 			terrain.material.needsUpdate = true;
@@ -445,7 +445,7 @@ console.log( 'kui' );
 			terrain.material.needsUpdate = true;
 
 		}
-console.log( 'ok', parent.selMap.selectedIndex );
+
 	}
 
 	function tileWest() {
