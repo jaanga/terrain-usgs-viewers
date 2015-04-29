@@ -11,16 +11,8 @@
 <script src=http://mrdoob.github.io/three.js/examples/js/libs/stats.min.js ></script>
 <script>
 
-	var dLat = 37.796;  // my desk in SF
-	var dLon = -122.398; // 
-
-//	var dLat = 37.8267;  // Alcatraz
-//	var dLon = -122.4233; // sf
-
-//	var dLat = 37.8600;  // Angel Island
-//	var dLon = -122.4300; // sf
-
-
+	var dLat = 37.796;  // sf
+	var dLon = -122.398; // sf
 
 	var lat = Math.floor( dLat );
 	var lon = Math.floor( dLon );
@@ -91,14 +83,14 @@
 			'<p><input type=checkbox id=inpEdges onchange=updateTerrain(); />Display Edges</p>' +
 			'<p>East / West <input type=range id=inpLeft min=0 max=1 value=' + ( dLon - lon ) + ' step=0.001 onchange=updateTerrain(); /></p>' +
 			'<p>North / South <input type=range id=inpTop min=0 max=1 value=' + ( dLat - lat ) + ' step=0.001 onchange=updateTerrain(); /></p>' +
-			'<p>Vertical Scale <input type=range id=inpScale min=1 max=30 value=' + scale + ' step=1 onchange=updateTerrain(); /></p>' +
+			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=scale step=1 onchange=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
 
 			'<p>' +
-				'Go: <button onclick=lonWest(); title="Go west" >&#8678;</button> ' +
-				'<button onclick=lonEast(); title="Go east"  >&#8680;</button> ' +
+				'Go: <button onclick=tileWest(); title="Go west" >&#8678;</button> ' +
+				'<button onclick=tileEast(); title="Go east"  >&#8680;</button> ' +
 
-				'<button onclick=latNorth(); title="Go north" >&#8679;</button> ' +
-				'<button onclick=latSouth(); title="Go south" >&#8681;</button> ' +
+				'<button onclick=tileNorth(); title="Go north" >&#8679;</button> ' +
+				'<button onclick=tileSouth(); title="Go south" >&#8681;</button> ' +
 			'</p>' +
 			'<p><small>Coverage <a href="http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_definition.jpg" target="_blank">Region 04</a> longitude 115 and west only</small></p>' +
 			'<div id=msg1 ></div>' +
@@ -110,7 +102,7 @@
 				selZoom.children[ i ].text = 'zoom level ' + ( i + 9 );
 		}
 
-		selZoom.selectedIndex = zoom - 9;
+		selZoom.selectedIndex = 3;
 
 		getMapOverlays();
 
@@ -230,7 +222,7 @@
 			heightMap.src = fileName;
 
 			msg1.innerHTML = 'lat:' + lat + ' dLat:' + dLat + '<br>lon:' + lon + ' dLon:' + dLon + '<br>' +
-				'<small>file: <a href=' + fileName + ' target="_blank">' + fileName + '</a></small>' +
+				'<small>file:' + fileName + '</small>' +
 			'';
 
 		} else {
@@ -272,35 +264,35 @@
 		dWidth = 3601 * ( tileXlonUL - dLon );
 		dHeight = 3601 * ( tileYlatUL - dLat );
 
-/*
+
 console.log( 
 	'\ndL/L', dLat.toFixed(3), dLon.toFixed(3),
 	'\nUL', tileYlatUL.toFixed(3), tileXlonUL.toFixed(3), 
 	'\nLR', tileYlatLR.toFixed(3), tileXlonLR.toFixed(3), 
 
 	'\n\ntiles', tileX, tileY,
-	'\ndTileXY', dTileX.toFixed(3), dTileY.toFixed(3),
+	'\ndTile', dTileX.toFixed(3), dTileY.toFixed(3),
 
 	'\n\nLeft/Top', left.toFixed(3), top.toFixed(3),
 
 	'\nvW/H', vWidth.toFixed(3), vHeight.toFixed(3),
 	'\ndW/H', dWidth.toFixed(3), dHeight.toFixed(3),
 
-	'\nAxis targetXY', tile * (tileXlonUL - dLon ) / dTileX, - tile * ( tileYlatUL - dLat ) / dTileY
+	'\nAxis XY', tile * parent.inpLeft.value, tile * parent.inpTop.value,
 
+tile * dTileX, 0, tile * dTileY
 );
-*/
 
 		contextTerrain.clearRect( 0, 0, tile, tile );
 		contextTerrain.drawImage( heightMap, left + dWidth, top - dHeight, vWidth, vHeight, 0, 0, tile, tile );
 
+		axisHelper.position.set( tile * parent.inpLeft.value, 0, tile * parent.inpTop.value - 128); 
+
 		var image = contextTerrain.getImageData( 0, 0, tile, tile );
 		var rgb = image.data;
- 
-		axisHelper.position.set(  - tile * (tileXlonUL - dLon ) / dTileX - 128, 0, tile * ( tileYlatUL - dLat ) / dTileY - 128 ); 
 
 		var elevation;
-		var scl = 0.01 * parseFloat( parent.inpScale.value );
+		var scl = 0.01 * scale;
 
 		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
 
@@ -507,8 +499,7 @@ console.log( 'ttt', left, top, left + dWidth , top - dHeight );
 
 	}
 
-
-	function lonWest() {
+	function tileWest() {
 
 		lon = --lon > -180 ? lon : 179;
 		dLon = --dLon > -180 ? dLon : 179;
@@ -516,7 +507,7 @@ console.log( 'ttt', left, top, left + dWidth , top - dHeight );
 
 	}
 
-	function lonEast() {
+	function tileEast() {
 		
 		lon = ++lon < 180 ? lon : -179;
 		dLon = ++dLon < 180 ? dLon : -179;
@@ -524,7 +515,8 @@ console.log( 'ttt', left, top, left + dWidth , top - dHeight );
 
 	}
 
-	function latNorth() {
+
+	function tileNorth() {
 
 		lat = ++lat < 80 ? lat : 80;
 		dLat = ++dLat < 80 ? dLat : 80;
@@ -532,7 +524,7 @@ console.log( 'ttt', left, top, left + dWidth , top - dHeight );
 
 	}
 
-	function latSouth() {
+	function tileSouth() {
 
 		lat = --lat > -90 ? lat : -90;
 		dLat = --dLat > -90 ? dLat : -90;

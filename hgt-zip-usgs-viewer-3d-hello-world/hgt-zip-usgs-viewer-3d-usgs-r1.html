@@ -19,7 +19,7 @@
 	var viewLeft = 0;
 	var viewTop = 0;	
 
-	var fileName = 'N37W123.hgt.zip';  // dingle
+	var fileName = 'N37W123.hgt.zip';  // San Francisco
 
 	var sourceDir = 'http://jaanga.github.io/terrain-usgs-data-1second/hgt-zip/';
 	var sourceDir = 'http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/Region_07/';
@@ -55,6 +55,14 @@
 			'<p>North / South <input type=range id=inpTop min=0 max=3345 value=' + viewTop + ' step=1 onmousemove=viewTop=parseFloat(inpTop.value);updateTerrain(); /></p>' +
 			'<p>View Size <input type=range id=inpSize min=100 max=3601 value=' + viewSize + ' step=1 onmousemove=viewSize=parseFloat(inpSize.value);updateTerrain(); /></p>' +
 			'<p>Vertical Scale <input type=range id=inpScale min=1 max=20 value=' + scale + ' step=1 onmousemove=scale=parseFloat(inpScale.value);updateTerrain(); /></p>' +
+			'<p>' +
+				'Go: <button onclick=tileWest(); title="Go west" >&#8678;</button> ' +
+				'<button onclick=tileEast(); title="Go east"  >&#8680;</button> ' +
+
+				'<button onclick=tileNorth(); title="Go north" >&#8679;</button> ' +
+				'<button onclick=tileSouth(); title="Go south" >&#8681;</button> ' +
+			'</p>' +
+
 		'';
 
 		stats = new Stats();
@@ -162,7 +170,6 @@
 
 	function parseHGT() {
 
-
 		var elevation;
 
 		for ( var i = 0, j = 0; i < byteArray.length; ) {
@@ -172,7 +179,7 @@
 
 			png[ j++ ] = elevation & 0x0000ff;
 			png[ j++ ] = ( elevation & 0x00ff00 ) >> 8;
-			png[ j++ ] = ( elevation & 0xff0000 ) >> 16;
+			png[ j++ ] = 0; //( elevation & 0xff0000 ) >> 16;
 			png[ j++ ] = 255;
 
 		}
@@ -194,9 +201,14 @@
 
 		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
 
-			elevation = rgb[ i ] + 256 * rgb[ i + 1 ] + 65536 * rgb[ i + 2 ] ;
+			elevation = rgb[ i ] + 256 * rgb[ i + 1 ]; // + 65536 * rgb[ i + 2 ] ;
 
-			elevation = elevation < 32768 ? elevation : elevation - 16777216;
+			if ( rgb[ i + 2 ] > 0 ) {
+
+				elevation = 0;
+
+			}
+			elevation = elevation < 32768 ? elevation : elevation - 65536; // 16777216;
 
 // uncomment the next line of code to see the errors corrected, but we should not need this correction
 // the data should come in already without error
@@ -215,7 +227,7 @@
 		terrain.scale.z = -1;
 		scene.add( terrain );
 
-		setLocationMapTarget();
+//		setLocationMapTarget();
 
 	}
 
@@ -264,7 +276,43 @@ console.log( 'fn', fileName, f );
 //		image.src = 'http://mt1.google.com/vt/lyrs=y&x=' + tileX + '&y=' + tileY  + '&z=' + zoom + '&scale=2';
 
 
-		}
+	}
+
+
+	function tileWest() {
+
+		lon = --lon > -180 ? lon : 179;
+		dLon = --dLon > -180 ? dLon : 179;
+		getHeightMap();
+
+	}
+
+	function tileEast() {
+		
+		lon = ++lon < 180 ? lon : -179;
+		dLon = ++dLon < 180 ? dLon : -179;
+		getHeightMap();
+
+	}
+
+
+	function tileNorth() {
+
+		lat = ++lat < 80 ? lat : 80;
+		dLat = ++dLat < 80 ? dLat : 80;
+		getHeightMap();
+
+	}
+
+	function tileSouth() {
+
+		lat = --lat > -90 ? lat : -90;
+		dLat = --dLat > -90 ? dLat : -90;
+		getHeightMap();
+
+	}
+
+
 	function animate() {
 
 		requestAnimationFrame( animate );
