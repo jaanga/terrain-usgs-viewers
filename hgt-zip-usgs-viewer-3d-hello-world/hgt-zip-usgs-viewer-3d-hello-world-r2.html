@@ -123,49 +123,40 @@
 
 		var png = imageHeightMap.data;
 		var elevation;
-var count = 0
-var txt = ' - ';
+		var count1 = 0;
+		var count2  = 0;
+		var txt = '\n';
 		var previousElevation = 0;
 
 		for ( var i = 0, j = 0; i < byteArray.length; i += 2 ) {
 
-// if ( byteArray[ i ] < 0 || byteArray[ i ] > 255   ) { count++; }
+// display some data values
+			if ( i > ( 3601 * 3451 + 2000 ) &&   i < ( 3601 * 3451 + 2130 )) {
 
+				txt += ( i - 3601 * 3451 ) + ':' + byteArray[ i ] + ',' + byteArray[ i + 1] + ' ' ;
 
-if ( i > ( 3601 * 3451 + 2000 ) &&   i < ( 3601 * 3451 + 2130 )) {
-
-//if ( byteArray[ i ] == 255 && byteArray[ i + 1] == 255 ) {
-
-txt += ( i - 3601 * 3451 ) + ':' + byteArray[ i ] + ',' + byteArray[ i + 1] + ' ' ;
-
-//count++;
-
-}
-
-// if ( byteArray[ i ] == 255 && byteArray[ i + 1] == 255 ) {
+			}
 
 			elevation = 256 * byteArray[ i ] + byteArray[ i + 1 ] ;
-//			elevation = elevation < 32768 ? elevation: elevation - 65536;	
+
+			elevation = elevation < 32760 ? elevation: elevation - 65536;	
 
 			if ( elevation == -32768 ) {
-				count++
+
+				count1++;
 				elevation = previousElevation;
 
 			}
-				previousElevation = elevation;
 
+			previousElevation = elevation;
 
-if ( byteArray[ i ] === 255 /* && byteArray[ i ] > 3  */ ) {
-// console.log( byteArray[ i ], byteArray[ i + 1] );
-// elevation = 0;
-// count++;
+/*
+if ( byteArray[ i ] === 255 && byteArray[ i ] > 3   ) {
+console.log( byteArray[ i ], byteArray[ i + 1] );
+	elevation = 0;
+	count2++;
 }
-
-if ( byteArray[ i ] > 3 && byteArray[ i] === 255 ) { 
-// console.log( byteArray[ i ], byteArray[ i + 1] );
-//elevation = 0;
-//count++;
-}
+*/
 
 			png[ j++ ] = elevation & 0x0000ff;
 			png[ j++ ] = ( elevation & 0x00ff00 ) >> 8;
@@ -174,7 +165,7 @@ if ( byteArray[ i ] > 3 && byteArray[ i] === 255 ) {
  
 		}
 
-console.log( 'count', count, txt );
+console.log( 'count1', count1, '\ncount2', count2, txt );
 		contextHeightMap.putImageData( imageHeightMap, 0, 0 );
 
 		updateTerrain();
