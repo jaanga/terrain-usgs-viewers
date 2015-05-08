@@ -150,13 +150,14 @@
 		heightMap.onload = updateTerrain;
 
 		canvasLocationMap = locationMapHolder.appendChild( document.createElement( 'canvas' ) );
-		canvasLocationMap.width = tile; canvasLocationMap.height = tile;
+		canvasLocationMap.width = tile; 
+		canvasLocationMap.height = tile;
 		canvasLocationMap.style.cssText = 'border: 1px red solid; /* position: absolute; top: 0; left: 6px;  z-index: 10; */ ';
 		canvasLocationMap.onclick = onMapClick;
 		contextLocationMap = canvasLocationMap.getContext( '2d' );
 
 		canvasTerrain = document.createElement( 'canvas' );
-		canvasTerrain.width = canvasTerrain.height =  tile;
+		canvasTerrain.width = canvasTerrain.height = tile;
 		document.body.appendChild( canvasTerrain );
 		canvasTerrain.style.cssText = 'margin: 20px; right: 0; position: absolute; top: 50px; z-index: 18; ';
 		contextTerrain = canvasTerrain.getContext( '2d' );
@@ -300,6 +301,8 @@ console.log(
 		axisHelper.position.set(  - tile * (tileXlonUL - dLon ) / dTileX - 128, 0, tile * ( tileYlatUL - dLat ) / dTileY - 128 ); 
 
 		var elevation;
+		var previousElevation = 0;
+
 		var scl = 0.01 * parseFloat( parent.inpScale.value );
 
 		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
@@ -307,9 +310,10 @@ console.log(
 			elevation = rgb[ i ] + 256 * rgb[ i + 1 ] + 65536 * rgb[ i + 2 ] ;
 
 			elevation = elevation < 32767 ? elevation : elevation - 16777216;
-			elevation  = elevation < -11000 ? 0 : elevation ;
+			elevation  = elevation < -11000 ? previousElevation : elevation ;
 
 			vertices[ j ] = scl * elevation ;
+			previousElevation = elevation
 
 		}
 

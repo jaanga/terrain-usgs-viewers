@@ -197,10 +197,11 @@
 
 		var rgb = contextTerrain.getImageData( 0, 0, 256, 256 ).data;
 		var elevation;
+		previousElevation = 0;
 		var scl = 0.01 * scale;
 
 		for ( var i = 0, j = 1; i < rgb.length; i += 4, j += 3 ) {
-
+/*
 			elevation = rgb[ i ] + 256 * rgb[ i + 1 ]; // + 65536 * rgb[ i + 2 ] ;
 
 			if ( rgb[ i + 2 ] > 0 ) {
@@ -216,6 +217,33 @@
 			elevation  = elevation < -11000 || elevation > 3000 ? 0 : elevation ;
 
 			vertices[ j ] = scl * elevation ;
+*/
+
+
+			elevation = rgb[ i ] + 256 * rgb[ i + 1 ];
+
+			elevation = elevation < 32768 ? elevation : elevation - 65536;
+
+			if ( rgb[ i + 1 ]  > 3 && rgb[ i + 1 ] < 255 ) {
+
+//			if ( elevation > max || elevation < min ) {
+
+				elevation = previousElevation;
+
+//				count1++;
+
+			} else if (  rgb[ i ] > 0 && rgb[ i ]  === rgb[ i + 1 ] ) {
+
+				elevation = previousElevation;
+
+//				count2++;
+
+			}
+
+			vertices[ j ] = scl * elevation ;
+			previousElevation = elevation;
+
+
 
 		}
 

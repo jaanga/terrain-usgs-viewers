@@ -166,6 +166,8 @@ if ( byteArray[ i - 2 ] > 3 && byteArray[ i - 2 ] < 255 ) {
 
 	function updateTerrain() {
 
+		contextTerrain.clearRect( 0, 0, 256, 256 );
+
 		contextTerrain.drawImage( canvasHeightMap, viewLeft, viewTop, viewSize, viewSize, 0, 0, 256, 256 );
 
 		var rgba = contextTerrain.getImageData( 0, 0, 256, 256 ).data;
@@ -200,6 +202,7 @@ if ( byteArray[ i - 2 ] > 3 && byteArray[ i - 2 ] < 255 ) {
 
 			vertices[ j ] = scl * elevation ;
 			previousElevation = elevation;
+
 		}
 
 		msg3.innerHTML = 'outside coundaries:' + count1 + '<br>' +
