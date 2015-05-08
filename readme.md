@@ -11,4 +11,4 @@ First cut at a viewer. Be prepared for some strange effects!
 
 [Jaanga Terrain PNG USGS 1 Second Viewer 3D Hello World]( http://jaanga.github.io/terrain-usgs-viewers/png-usgs-viewer-3d-hello-world/r1/png-usgs-viewer-3d-hello-world.html )
 
-[testing ] ( http://jaanga.github.io/terrain-usgs-viewers/hgt-zip-usgs-viewer-3d-hello-world/hgt-zip-usgs-viewer-3d-hello-world-r2.html )
+[testing]( http://jaanga.github.io/terrain-usgs-viewers/hgt-zip-usgs-viewer-3d-hello-world/hgt-zip-usgs-viewer-3d-hello-world-r2.html )
