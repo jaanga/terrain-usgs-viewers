@@ -6,9 +6,15 @@
 <meta name=viewport content='width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0' />
 </head>
 <body>
+<!--
 <script src=http://mrdoob.github.io/three.js/build/three.min.js ></script>
 <script src=http://mrdoob.github.io/three.js/examples/js/controls/OrbitControls.js ></script>
 <script src=http://mrdoob.github.io/three.js/examples/js/libs/stats.min.js ></script>
+-->
+
+<script src=http://rawgit.com/mrdoob/three.js/r72/build/three.min.js ></script>
+<script src=http://rawgit.com/mrdoob/three.js/r72/examples/js/controls/OrbitControls.js ></script>
+<script src=http://rawgit.com/mrdoob/three.js/r72/examples/js/libs/stats.min.js ></script>
 <script>
 
 	var dLat = 37.796;  // my desk in SF
@@ -139,7 +145,7 @@
 
 		vertices = geometry.attributes.position.array;
 
-		mapMaterial = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading, side: 2 } );
+		mapMaterial = new THREE.MeshNormalMaterial( { side: 2 } );
 
 //		THREE.ImageUtils.crossOrigin = 'anonymous';
 
@@ -427,7 +433,7 @@ console.log( 'ttt', left, top, left + dWidth , top - dHeight );
 
 		if ( parent.selMap.selectedIndex === 0 ) {
 
-			mapMaterial = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading, side: 2 } );
+			mapMaterial = new THREE.MeshNormalMaterial( { side: 2 } );
 			terrain.material = mapMaterial;
 			terrain.material.needsUpdate = true;
 
